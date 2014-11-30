@@ -39,10 +39,7 @@ module Plex
         server = Plex::Server.new(@config[:host], @config[:port])
 
         server.library.section(@config[:section]).all.each do |show|
-          next if @config[:skip].include? show.title
-
           puts "#{show.title}".bold
-
           show.seasons.each do |season|
             puts " - #{season.title}"
             season.episodes.each do |episode|
@@ -50,11 +47,11 @@ module Plex
               if episode.respond_to?(:view_count)
                 episode.medias.each do |media|
                   media.parts.each do |part|
-                    if File.exist?(part.file) and @config[:delete]
+                    if @config[:delete] and not @config[:skip].include? show.title and File.exist?(part.file)
                       File.delete(part.file)
                       puts " (deleted)".orange
                     else
-                      if @config[:delete]
+                      if @config[:delete] or @config[:skip].include? show.title
                         puts " (skipped)".green
                       else
                         puts " (failed)".red
