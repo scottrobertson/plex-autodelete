@@ -4,7 +4,7 @@ $:.unshift File.expand_path(File.dirname(Pathname.new(__FILE__).realpath) + '/..
 require 'plex/autodelete/cli'
 
 begin
-    Plex::Autodelete::CLI.start(ARGV)
+    Plex::Autodelete::CLI.start
 rescue
   puts "Error: #{$!.message} \n\n"
 end
