@@ -21,7 +21,7 @@ module Plex
       desc "cleanup", "Remove all watched episodes from Plex"
       def cleanup
         unless File.exists? @@config_file
-          puts "Config file does not exist, please run 'plex-autocomplete install' to generate it"
+          puts "Config file does not exist, please run 'plex-autocomplete install' to generate it".red
           exit
         end
 
