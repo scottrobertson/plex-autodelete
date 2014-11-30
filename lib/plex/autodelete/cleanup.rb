@@ -60,7 +60,11 @@ module Plex
                   end
                 end
               else
-                puts ' (kept)'.blue
+                if @config[:skip].include? show.title
+                  puts ' (skipped)'.green
+                else
+                  puts ' (kept)'.blue
+                end
               end
             end
           end
