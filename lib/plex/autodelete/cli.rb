@@ -1,7 +1,5 @@
 require 'thor'
 require 'plex/autodelete/cleanup'
-require 'plex/autodelete/version'
-require 'yaml'
 
 module Plex
   module Autodelete
