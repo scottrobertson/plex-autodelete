@@ -2,6 +2,7 @@ require 'thor'
 require 'yaml'
 require 'nori'
 require 'colorize'
+require 'net/http'
 require 'plex/autodelete/cleanup'
 
 module Plex
