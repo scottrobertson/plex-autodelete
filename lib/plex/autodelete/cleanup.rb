@@ -49,7 +49,7 @@ module Plex
                   media.parts.each do |part|
                     if @config[:delete] and not @config[:skip].include? show.title and File.exist?(part.file)
                       File.delete(part.file)
-                      puts " (deleted)".orange
+                      puts " (deleted)".yellow
                     else
                       if @config[:delete] or @config[:skip].include? show.title
                         puts " (skipped)".green
