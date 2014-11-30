@@ -41,21 +41,29 @@ module Plex
         server.library.section(@config[:section]).all.each do |show|
           next if @config[:skip].include? show.title
 
+          puts "#{show.title}".bold
+
           show.seasons.each do |season|
+            puts " - #{season.title}"
             season.episodes.each do |episode|
+              print "   - #{episode.title}"
               if episode.respond_to?(:view_count)
-                puts " - #{show.title} - #{season.title} - #{episode.title}"
                 episode.medias.each do |media|
                   media.parts.each do |part|
                     if File.exist?(part.file) and @config[:delete]
                       File.delete(part.file)
-                      puts "   - File Removed: #{part.file}"
+                      puts " (deleted)".orange
                     else
-                      puts "   - File Not Removed: #{part.file}"
+                      if @config[:delete]
+                        puts " (skipped)".green
+                      else
+                        puts " (failed)".red
+                      end
                     end
                   end
                 end
-                puts nil
+              else
+                puts ' (kept)'.blue
               end
             end
           end

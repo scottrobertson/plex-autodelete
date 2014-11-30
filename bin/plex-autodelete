@@ -6,5 +6,5 @@ require 'plex/autodelete/cli'
 begin
     Plex::Autodelete::CLI.start
 rescue
-  puts "Error: #{$!.message} \n\n"
+  puts "Error: #{$!.message} \n".red
 end
