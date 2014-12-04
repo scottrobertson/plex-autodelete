@@ -1,6 +1,8 @@
 Plex Autodelete
 ===
 
+[![Gem Version](https://badge.fury.io/rb/plex-autodelete.svg)](http://badge.fury.io/rb/plex-autodelete)
+
 Automatically delete files that have been marked as watched in Plex.
 
 #### Install
