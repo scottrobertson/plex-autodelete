@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["scottymeuk@gmail.com"]
   spec.summary       = "Automatically removed watched episodes in Plex"
   spec.description   = "Automatically removed watched episodes in Plex"
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/scottrobertson/plex-autodelete"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
