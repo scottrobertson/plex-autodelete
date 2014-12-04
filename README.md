@@ -23,3 +23,16 @@ plex-autodelete install
 ```
 plex-autodelete cleanup
 ```
+
+#### Example ~/.plex-autodelete.yml file
+```
+---
+:host: 127.0.0.1
+:port: 32400
+:token: token123
+:skip:
+- Moomin (1990)
+- Adventure Time
+:delete: true
+:section: 1
+```
