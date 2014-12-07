@@ -40,7 +40,10 @@ module Plex
         server = Plex::Server.new(@config[:host], @config[:port])
 
         server.library.section(@config[:section]).all.each do |show|
+
+          puts nil
           puts "#{show.title}".bold
+
           show.seasons.each do |season|
             puts " - #{season.title}"
             season.episodes.each do |episode|
