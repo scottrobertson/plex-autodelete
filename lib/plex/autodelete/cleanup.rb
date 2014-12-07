@@ -35,16 +35,19 @@ module Plex
         end
       end
 
-      def self.cleanup
-
-        self.required_params!
-
+      def self.plex_server
         Plex.configure do |config|
           config.auth_token = @config[:token]
         end
 
-        server = Plex::Server.new(@config[:host], @config[:port])
+        Plex::Server.new(@config[:host], @config[:port])
+      end
 
+      def self.cleanup
+
+        self.required_params!
+
+        server = self.plex_server
         server.library.section(@config[:section]).all.each do |show|
 
           puts nil
