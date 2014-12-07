@@ -1,5 +1,6 @@
 require "plex/autodelete/version"
 require "plex-ruby"
+require "yaml"
 
 module Plex
   module Autodelete
@@ -43,27 +44,31 @@ module Plex
           show.seasons.each do |season|
             puts " - #{season.title}"
             season.episodes.each do |episode|
-              print "   - #{episode.title}"
-              if episode.respond_to?(:view_count)
-                episode.medias.each do |media|
-                  media.parts.each do |part|
-                    if @config[:delete] and not @config[:skip].include? show.title and File.exist?(part.file)
-                      File.delete(part.file)
-                      puts " (deleted)".yellow
-                    else
-                      if not @config[:delete] or @config[:skip].include? show.title
-                        puts " (skipped)".green
+              print "   - #{episode.title} - "
+              if episode.respond_to?(:view_count) and episode.view_count.to_i > 0
+                if @config[:delete] and @config[:skip].include? show.title
+                  episode.medias.each do |media|
+                    media.parts.each do |part|
+                      if File.exist?(part.file)
+                        File.delete(part.file)
+                        puts "Deleted".yellow
                       else
-                        puts " (failed)".red
+                        puts "File does not exist".red
                       end
                     end
+                  end
+                else
+                  if @config[:skip].include? show.title
+                    puts 'Skipped (Show in skip list)'.blue
+                  else
+                    puts 'Skipped (Test mode enabled, disable to perform delete)'.blue
                   end
                 end
               else
                 if @config[:skip].include? show.title
-                  puts ' (skipped)'.green
+                  puts 'Skipped'.blue
                 else
-                  puts ' (kept)'.blue
+                  puts 'Not watched yet'.blue
                 end
               end
             end
