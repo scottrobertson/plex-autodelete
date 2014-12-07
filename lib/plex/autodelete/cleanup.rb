@@ -51,7 +51,7 @@ module Plex
                       File.delete(part.file)
                       puts " (deleted)".yellow
                     else
-                      if @config[:delete] or @config[:skip].include? show.title
+                      if not @config[:delete] or @config[:skip].include? show.title
                         puts " (skipped)".green
                       else
                         puts " (failed)".red
