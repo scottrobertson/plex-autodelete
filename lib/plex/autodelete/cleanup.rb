@@ -6,6 +6,13 @@ module Plex
   module Autodelete
     class Cleanup
 
+      @stats = {
+        skipped: 0,
+        deleted: 0,
+        kept: 0,
+        failed: 0,
+      }
+
       @config = {
         host: '127.0.0.1',
         port: 32400,
@@ -53,14 +60,17 @@ module Plex
                   episode.medias.each do |media|
                     media.parts.each do |part|
                       if File.exist?(part.file)
+                        self.increment_stat :deleted
                         File.delete(part.file)
                         puts "Deleted".yellow
                       else
+                        self.increment_stat :failed
                         puts "File does not exist".red
                       end
                     end
                   end
                 else
+                  self.increment_stat :skipped
                   if @config[:skip].include? show.title
                     puts 'Skipped (Show in skip list)'.blue
                   else
@@ -69,15 +79,37 @@ module Plex
                 end
               else
                 if @config[:skip].include? show.title
-                  puts 'Skipped'.blue
+                  self.increment_stat :skipped
+                  puts 'Skipped (Show in skip list)'.blue
                 else
+                  self.increment_stat :kept
                   puts 'Not watched yet'.blue
                 end
               end
             end
           end
         end
+
+        self.output_stats
+
       end
+
+      def self.increment_stat key
+        @stats[key] += 1
+      end
+
+      def self.output_stats
+        puts nil
+        puts '-------------'
+        puts '    Stats    '
+        puts '-------------'
+        puts "Deleted: #{@stats[:deleted].to_i}"
+        puts "Skipped: #{@stats[:skipped].to_i}"
+        puts "Kept:    #{@stats[:kept].to_i}"
+        puts "Failed:  #{@stats[:failed].to_i}"
+        puts nil
+      end
+
     end
   end
 end
