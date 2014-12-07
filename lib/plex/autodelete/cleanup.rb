@@ -27,6 +27,17 @@ module Plex
         opts.each {|key, value| @config[key.to_sym] = value if @config_keys.include? key.to_sym}
       end
 
+      def self.cleanup
+        self.required_params!
+        self.plex_server.library.section(@config[:section]).all.each do |show|
+          self.proccess_show show
+        end
+
+        self.output_stats
+      end
+
+      private
+
       def self.required_params!
         [:host, :port, :token, :section].each do |param|
           if @config[param].nil?
@@ -43,61 +54,73 @@ module Plex
         Plex::Server.new(@config[:host], @config[:port])
       end
 
-      def self.cleanup
-
-        self.required_params!
-
-        server = self.plex_server
-        server.library.section(@config[:section]).all.each do |show|
-
-          puts nil
-          puts "#{show.title}".bold
-
-          show.seasons.each do |season|
-            puts " - #{season.title}"
-            season.episodes.each do |episode|
-              print "   - #{episode.title} - "
-              if episode.respond_to?(:view_count) and episode.view_count.to_i > 0
-                if @config[:delete] and @config[:skip].include? show.title
-                  episode.medias.each do |media|
-                    media.parts.each do |part|
-                      if File.exist?(part.file)
-                        self.increment_stat :deleted
-                        File.delete(part.file)
-                        puts "Deleted".yellow
-                      else
-                        self.increment_stat :failed
-                        puts "File does not exist".red
-                      end
-                    end
-                  end
-                else
-                  self.increment_stat :skipped
-                  if @config[:skip].include? show.title
-                    puts 'Skipped (Show in skip list)'.blue
-                  else
-                    puts 'Skipped (Test mode enabled, disable to perform delete)'.blue
-                  end
-                end
-              else
-                if @config[:skip].include? show.title
-                  self.increment_stat :skipped
-                  puts 'Skipped (Show in skip list)'.blue
-                else
-                  self.increment_stat :kept
-                  puts 'Not watched yet'.blue
-                end
-              end
-            end
-          end
+      def self.proccess_show show
+        puts nil
+        puts "#{show.title}".bold
+        show_skipped = @config[:skip].include? show.title
+        show.seasons.each do |season|
+          self.proccess_season season, show_skipped
         end
-
-        self.output_stats
-
       end
 
-      def self.increment_stat key
-        @stats[key] += 1
+      def self.proccess_season season, show_skipped
+        puts " - #{season.title}"
+        season.episodes.each do |episode|
+          self.proccess_episode episode, show_skipped
+        end
+      end
+
+      def self.proccess_episode episode, show_skipped
+        print "   - #{episode.title} - "
+        if self.should_delete_episode? episode, show_skipped
+          episode.medias.each do |media|
+            self.process_media media, show_skipped
+          end
+        else
+          self.output_episode_skipped_reason episode, show_skipped
+        end
+      end
+
+      def self.should_delete_episode? episode, show_skipped
+        @config[:delete] and not show_skipped and episode_watched? episode
+      end
+
+      def self.output_episode_skipped_reason episode, show_skipped
+        if episode_watched? episode and not @config[:delete]
+          self.increment_stat :skipped
+          puts 'Skipped (Test mode enabled, disable to perform delete)'.blue
+        elsif episode_watched? episode and show_skipped
+          self.increment_stat :skipped
+          puts 'Skipped (Show in skip list)'.blue
+        else
+          self.increment_stat :kept
+          puts 'Not watched yet'.blue
+        end
+      end
+
+      def self.episode_watched? episode
+        episode.respond_to?(:view_count) and episode.view_count.to_i > 0
+      end
+
+      def self.proccess_media media, show_skipped
+        media.parts.each do |part|
+          self.proccess_part part, show_skipped
+        end
+      end
+
+      def self.proccess_part part, show_skipped
+        if File.exist?(part.file)
+          self.increment_stat :deleted
+          File.delete(part.file)
+          puts "Deleted".yellow
+        else
+          self.increment_stat :failed
+          puts "File does not exist".red
+        end
+      end
+
+      def self.increment_stat stat
+        @stats[stat] += 1
       end
 
       def self.output_stats
