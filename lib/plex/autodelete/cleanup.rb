@@ -30,7 +30,7 @@ module Plex
       def self.cleanup
         self.required_params!
         self.plex_server.library.section(@config[:section]).all.each do |show|
-          self.proccess_show show
+          self.process_show show
         end
 
         self.output_stats
@@ -54,23 +54,23 @@ module Plex
         Plex::Server.new(@config[:host], @config[:port])
       end
 
-      def self.proccess_show show
+      def self.process_show show
         puts nil
         puts "#{show.title}".bold
         show_skipped = @config[:skip].include? show.title
         show.seasons.each do |season|
-          self.proccess_season season, show_skipped
+          self.process_season season, show_skipped
         end
       end
 
-      def self.proccess_season season, show_skipped
+      def self.process_season season, show_skipped
         puts " - #{season.title}"
         season.episodes.each do |episode|
-          self.proccess_episode episode, show_skipped
+          self.process_episode episode, show_skipped
         end
       end
 
-      def self.proccess_episode episode, show_skipped
+      def self.process_episode episode, show_skipped
         print "   - #{episode.title} - "
         if self.should_delete_episode? episode, show_skipped
           episode.medias.each do |media|
@@ -102,13 +102,13 @@ module Plex
         episode.respond_to?(:view_count) and episode.view_count.to_i > 0
       end
 
-      def self.proccess_media media, show_skipped
+      def self.process_media media, show_skipped
         media.parts.each do |part|
-          self.proccess_part part, show_skipped
+          self.process_part part, show_skipped
         end
       end
 
-      def self.proccess_part part, show_skipped
+      def self.process_part part, show_skipped
         if File.exist?(part.file)
           self.increment_stat :deleted
           File.delete(part.file)
