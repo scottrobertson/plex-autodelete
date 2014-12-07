@@ -1,6 +1,5 @@
 require "plex/autodelete/version"
 require "plex-ruby"
-require "yaml"
 
 module Plex
   module Autodelete
